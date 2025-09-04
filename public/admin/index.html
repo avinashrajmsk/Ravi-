@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - SATYAM GOLD</title>
+    <meta name="description" content="Admin dashboard for managing Satyam Gold e-commerce website">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/admin.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#F97316',
+                        secondary: '#FED7AA',
+                        accent: '#EA580C'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between py-4">
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+                        SG
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">SATYAM GOLD</h1>
+                        <p class="text-sm text-gray-500">Admin Panel</p>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center space-x-1">
+                    <button class="nav-tab active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt mr-2"></i>
+                        Dashboard
+                    </button>
+                    <button class="nav-tab" data-section="orders">
+                        <i class="fas fa-shopping-bag mr-2"></i>
+                        Orders
+                    </button>
+                    <button class="nav-tab" data-section="products">
+                        <i class="fas fa-box mr-2"></i>
+                        Products
+                    </button>
+                    <button class="nav-tab" data-section="settings">
+                        <i class="fas fa-cog mr-2"></i>
+                        Settings
+                    </button>
+                </nav>
+                
+                <!-- Actions -->
+                <div class="flex items-center space-x-3">
+                    <a href="/" target="_blank" class="text-gray-600 hover:text-primary transition-colors">
+                        <i class="fas fa-external-link-alt mr-1"></i>
+                        View Website
+                    </a>
+                    <button id="logout-btn" class="text-red-600 hover:text-red-700 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="md:hidden bg-white border-b px-4 py-2">
+        <div class="flex space-x-1 overflow-x-auto">
+            <button class="nav-tab-mobile active" data-section="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-tab-mobile" data-section="orders">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Orders</span>
+            </button>
+            <button class="nav-tab-mobile" data-section="products">
+                <i class="fas fa-box"></i>
+                <span>Products</span>
+            </button>
+            <button class="nav-tab-mobile" data-section="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="section active">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Admin Dashboard</h2>
+                <p class="text-gray-600">Manage your store, products, and settings.</p>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="stats-card">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shopping-bag text-2xl text-blue-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-500">Total Orders</p>
+                            <p class="text-2xl font-bold text-gray-800" id="total-orders">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-box text-2xl text-green-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-500">Total Products</p>
+                            <p class="text-2xl font-bold text-gray-800" id="total-products">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-clock text-2xl text-yellow-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-500">Pending Orders</p>
+                            <p class="text-2xl font-bold text-gray-800" id="pending-orders">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-card">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-rupee-sign text-2xl text-purple-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-500">Revenue</p>
+                            <p class="text-2xl font-bold text-gray-800" id="total-revenue">₹0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Orders -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold">Recent Orders</h3>
+                    <button class="text-primary hover:text-accent transition-colors" onclick="admin.showSection('orders')">
+                        View All <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+                
+                <div id="recent-orders" class="space-y-4">
+                    <!-- Recent orders will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Orders Section -->
+        <section id="orders-section" class="section">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Order Management</h2>
+            </div>
+            
+            <!-- Orders Filter -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <select id="order-status-filter" class="form-control">
+                        <option value="">All Orders</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Out For Delivery">Out For Delivery</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+                    
+                    <input type="date" id="order-date-filter" class="form-control">
+                    
+                    <input type="text" id="order-search" placeholder="Search by order number or customer..."
+                           class="form-control">
+                           
+                    <button onclick="admin.filterOrders()" class="btn btn-primary whitespace-nowrap">
+                        <i class="fas fa-search mr-2"></i>
+                        Filter
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Orders List -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="p-6">
+                    <div id="orders-list" class="space-y-4">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                    
+                    <div id="orders-pagination" class="mt-6 flex justify-center">
+                        <!-- Pagination will be added here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section id="products-section" class="section">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Product Management</h2>
+                <button onclick="admin.showAddProductModal()" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i>
+                    Add Product
+                </button>
+            </div>
+            
+            <!-- Products Grid -->
+            <div id="products-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Products will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settings-section" class="section">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Site Settings</h2>
+            </div>
+            
+            <!-- Settings Tabs -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="border-b border-gray-200">
+                    <nav class="flex space-x-8 px-6">
+                        <button class="settings-tab active" data-tab="branding">
+                            <i class="fas fa-palette mr-2"></i>
+                            Website Branding
+                        </button>
+                        <button class="settings-tab" data-tab="contact">
+                            <i class="fas fa-address-book mr-2"></i>
+                            Contact Information
+                        </button>
+                        <button class="settings-tab" data-tab="hero">
+                            <i class="fas fa-images mr-2"></i>
+                            Hero Slider
+                        </button>
+                        <button class="settings-tab" data-tab="security">
+                            <i class="fas fa-shield-alt mr-2"></i>
+                            Security
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- Settings Content -->
+                <div class="p-6">
+                    <!-- Website Branding Tab -->
+                    <div id="branding-tab" class="settings-content active">
+                        <h3 class="text-lg font-semibold mb-4">Website Branding</h3>
+                        <p class="text-gray-600 mb-6">Customize your website's name and logo</p>
+                        
+                        <form id="branding-form" class="space-y-6">
+                            <div class="form-group">
+                                <label for="site_name">Site Name</label>
+                                <input type="text" id="site_name" name="site_name" class="form-control" 
+                                       placeholder="SATYAM GOLD">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Logo</label>
+                                <div class="flex flex-col sm:flex-row gap-4">
+                                    <div class="flex-1">
+                                        <input type="url" id="site_logo" name="site_logo" class="form-control" 
+                                               placeholder="https://example.com/logo.png">
+                                        <p class="text-sm text-gray-500 mt-1">Enter logo URL</p>
+                                    </div>
+                                    <button type="button" onclick="admin.uploadImage('site_logo')" class="btn btn-secondary">
+                                        <i class="fas fa-upload mr-2"></i>
+                                        Upload Image
+                                    </button>
+                                </div>
+                                <div class="mt-4">
+                                    <p class="text-sm text-gray-600 mb-2">Preview & Adjust</p>
+                                    <div id="logo-preview" class="w-20 h-20 border-2 border-gray-200 rounded-lg flex items-center justify-center bg-gray-50">
+                                        <i class="fas fa-image text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Contact Information Tab -->
+                    <div id="contact-tab" class="settings-content">
+                        <h3 class="text-lg font-semibold mb-4">Contact Information</h3>
+                        <p class="text-gray-600 mb-6">Update your contact details</p>
+                        
+                        <form id="contact-form" class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="form-group">
+                                    <label for="phone_number">Phone Number</label>
+                                    <input type="tel" id="phone_number" name="phone_number" class="form-control">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="whatsapp_number">WhatsApp Number</label>
+                                    <input type="tel" id="whatsapp_number" name="whatsapp_number" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email_address">Email Address</label>
+                                <input type="email" id="email_address" name="email_address" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="business_address">Business Address</label>
+                                <textarea id="business_address" name="business_address" rows="3" class="form-control"></textarea>
+                            </div>
+                            
+                            <!-- Social Media Links -->
+                            <h4 class="text-md font-semibold mt-8 mb-4">Social Media Links & Logos</h4>
+                            <p class="text-gray-600 mb-6">Add your social media profiles and upload custom logos</p>
+                            
+                            <div class="space-y-4">
+                                <div class="form-group">
+                                    <label for="facebook_url">Facebook Page URL</label>
+                                    <input type="url" id="facebook_url" name="facebook_url" class="form-control"
+                                           placeholder="https://facebook.com/yourpage">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="instagram_url">Instagram Profile URL</label>
+                                    <input type="url" id="instagram_url" name="instagram_url" class="form-control"
+                                           placeholder="https://instagram.com/yourprofile">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="whatsapp_chat_url">WhatsApp Chat URL</label>
+                                    <input type="url" id="whatsapp_chat_url" name="whatsapp_chat_url" class="form-control"
+                                           placeholder="https://wa.me/916201530654">
+                                </div>
+                            </div>
+                            
+                            <!-- Website Customization -->
+                            <h4 class="text-md font-semibold mt-8 mb-4">Website Customization</h4>
+                            <p class="text-gray-600 mb-6">Customize colors and footer text</p>
+                            
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="form-group">
+                                    <label for="primary_color">Primary Color</label>
+                                    <input type="color" id="primary_color" name="primary_color" class="form-control h-12">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="secondary_color">Secondary Color</label>
+                                    <input type="color" id="secondary_color" name="secondary_color" class="form-control h-12">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="footer_text">Footer Text</label>
+                                <textarea id="footer_text" name="footer_text" rows="2" class="form-control"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Hero Slider Tab -->
+                    <div id="hero-tab" class="settings-content">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-semibold">Hero Slider Images</h3>
+                                <p class="text-gray-600">Manage the sliding images on your homepage (Recommended: 1920 x 1080 pixels)</p>
+                            </div>
+                            <button onclick="admin.showAddHeroImageModal()" class="btn btn-primary">
+                                <i class="fas fa-plus mr-2"></i>
+                                Add New Hero Image
+                            </button>
+                        </div>
+                        
+                        <div id="hero-images-list" class="space-y-4">
+                            <!-- Hero images will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Security Tab -->
+                    <div id="security-tab" class="settings-content">
+                        <h3 class="text-lg font-semibold mb-4">Security</h3>
+                        <p class="text-gray-600 mb-6">Manage admin panel password</p>
+                        
+                        <form id="password-form" class="max-w-md">
+                            <div class="form-group">
+                                <label for="current_password">Current Password (Leave blank for first time setup)</label>
+                                <input type="password" id="current_password" name="current_password" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="new_password">New Password</label>
+                                <input type="password" id="new_password" name="new_password" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="confirm_password">Confirm New Password</label>
+                                <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-lock mr-2"></i>
+                                Change Admin Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Save Settings Button -->
+                <div class="border-t border-gray-200 p-6">
+                    <button onclick="admin.saveAllSettings()" class="btn btn-primary btn-lg w-full">
+                        <i class="fas fa-save mr-2"></i>
+                        Save All Settings
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals Container -->
+    <div id="modals-container"></div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p class="mt-4 text-gray-600">Loading...</p>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="/js/api.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

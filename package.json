@@ -1,0 +1,24 @@
+{
+  "name": "satyam-gold",
+  "version": "1.0.0",
+  "description": "Satyam Gold E-commerce Website",
+  "main": "functions/index.js",
+  "scripts": {
+    "dev": "wrangler pages dev public --d1=satyam-gold-production --kv=KV --r2=R2 --local --port 3000",
+    "build": "echo 'No build step required for static site'",
+    "deploy": "wrangler pages deploy public",
+    "db:create": "wrangler d1 create satyam-gold-production",
+    "db:migrate": "wrangler d1 migrations apply satyam-gold-production --local",
+    "db:migrate:prod": "wrangler d1 migrations apply satyam-gold-production",
+    "db:seed": "wrangler d1 execute satyam-gold-production --local --file=./seed.sql",
+    "db:reset": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate && npm run db:seed",
+    "test": "curl http://localhost:3000",
+    "start": "npm run dev"
+  },
+  "keywords": ["e-commerce", "cloudflare-pages", "d1", "r2", "kv"],
+  "author": "Satyam Gold",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.78.0"
+  }
+}

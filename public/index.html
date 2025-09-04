@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SATYAM GOLD - Premium Quality Products</title>
+    <meta name="description" content="We deliver the finest quality Atta, Sattu, and Besan directly to your doorstep. Made with traditional methods for authentic taste and nutrition.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#F97316',
+                        secondary: '#FED7AA',
+                        accent: '#EA580C'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans">
+    <!-- Header -->
+    <header class="bg-white shadow-lg fixed w-full top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between py-4">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <img id="site-logo" src="https://base44.app/api/apps/68a375197577ce82d3f4980e/files/04925dbc9_100012467.png" 
+                         alt="SATYAM GOLD" class="h-12 w-12 rounded-full">
+                    <div>
+                        <h1 id="site-name" class="text-xl font-bold text-gray-800">SATYAM GOLD</h1>
+                        <p class="text-sm text-gray-600">Premium Quality Products</p>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="#home" class="text-gray-700 hover:text-primary transition-colors">Home</a>
+                    <a href="#products" class="text-gray-700 hover:text-primary transition-colors">Products</a>
+                    <a href="#about" class="text-gray-700 hover:text-primary transition-colors">About</a>
+                    <a href="#contact" class="text-gray-700 hover:text-primary transition-colors">Contact</a>
+                </nav>
+                
+                <!-- Cart & Menu -->
+                <div class="flex items-center space-x-4">
+                    <!-- Cart Icon -->
+                    <button id="cart-btn" class="relative p-2 text-gray-700 hover:text-primary transition-colors">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cart-count" class="absolute -top-1 -right-1 bg-primary text-white rounded-full w-5 h-5 text-xs flex items-center justify-center hidden">0</span>
+                    </button>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-700">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <nav id="mobile-menu" class="md:hidden hidden pb-4 border-t">
+                <div class="flex flex-col space-y-3 pt-4">
+                    <a href="#home" class="text-gray-700 hover:text-primary transition-colors">Home</a>
+                    <a href="#products" class="text-gray-700 hover:text-primary transition-colors">Products</a>
+                    <a href="#about" class="text-gray-700 hover:text-primary transition-colors">About</a>
+                    <a href="#contact" class="text-gray-700 hover:text-primary transition-colors">Contact</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Slider -->
+    <section id="hero-slider" class="mt-20">
+        <div class="relative overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100">
+            <div id="slider-container" class="flex transition-transform duration-500 ease-in-out">
+                <!-- Hero slides will be loaded dynamically -->
+            </div>
+            
+            <!-- Slider Navigation -->
+            <div class="absolute inset-0 flex items-center justify-between px-4">
+                <button id="prev-slide" class="p-3 bg-white/80 hover:bg-white rounded-full shadow-lg transition-all">
+                    <i class="fas fa-chevron-left text-gray-700"></i>
+                </button>
+                <button id="next-slide" class="p-3 bg-white/80 hover:bg-white rounded-full shadow-lg transition-all">
+                    <i class="fas fa-chevron-right text-gray-700"></i>
+                </button>
+            </div>
+            
+            <!-- Slider Dots -->
+            <div id="slider-dots" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                <!-- Dots will be generated dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 bg-orange-50">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-leaf text-2xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">MADE TO ORDER FRESHNESS</h3>
+                    <p class="text-gray-600">All our products are manufactured only after an order is received ensuring true freshness</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-cog text-2xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">TRADITIONAL STONE MILLING</h3>
+                    <p class="text-gray-600">We embrace the age-old technique of stone-milling to retain maximum nutritional value</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-clock text-2xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">FRESHLY DELIVERED IN 24 HOURS</h3>
+                    <p class="text-gray-600">All our products are freshly packed and delivered to customer's doorstep in 24 hours</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="py-16">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Shop From Our Premium Range of Categories</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Discover our carefully curated selection of traditional Indian products, made with love and delivered fresh to your doorstep.</p>
+            </div>
+            
+            <div id="products-grid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Products will be loaded dynamically -->
+            </div>
+            
+            <div class="text-center mt-12">
+                <button id="load-more-products" class="bg-primary hover:bg-accent text-white px-8 py-3 rounded-full font-medium transition-colors">
+                    <i class="fas fa-arrow-right mr-2"></i>
+                    View All Products
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-primary text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4">Experience India's Finest Traditional Products</h2>
+            <p class="text-xl mb-8 opacity-90">From our kitchen to yours - taste the difference of authentic, stone-milled products made with centuries-old techniques.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="scrollToSection('products')" class="bg-white text-primary hover:bg-gray-100 px-8 py-3 rounded-full font-medium transition-colors">
+                    <i class="fas fa-shopping-cart mr-2"></i>
+                    Start Shopping
+                </button>
+                <button onclick="openBulkOrderModal()" class="border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-3 rounded-full font-medium transition-colors">
+                    <i class="fas fa-boxes mr-2"></i>
+                    Bulk Orders
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Contact Us</h2>
+                <p class="text-gray-600">Get in touch with us for any queries or support</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-xl font-semibold mb-6">Get in Touch</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-primary"></i>
+                            <span id="contact-phone">9631816666</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fab fa-whatsapp text-green-500"></i>
+                            <span id="contact-whatsapp">6201530654</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-primary"></i>
+                            <span id="contact-email">avinash@gmail.com</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-6">Quick Order</h3>
+                    <form id="quick-order-form" class="space-y-4">
+                        <input type="text" placeholder="Your Name" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                        <input type="tel" placeholder="Phone Number" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                        <textarea placeholder="Your Requirements" rows="4" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" required></textarea>
+                        <button type="submit" class="w-full bg-primary hover:bg-accent text-white py-3 rounded-lg font-medium transition-colors">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img id="footer-logo" src="https://base44.app/api/apps/68a375197577ce82d3f4980e/files/04925dbc9_100012467.png" 
+                             alt="SATYAM GOLD" class="h-10 w-10 rounded-full">
+                        <h3 class="text-xl font-bold">SATYAM GOLD</h3>
+                    </div>
+                    <p class="text-gray-300 mb-4">Premium Quality Products</p>
+                    <p class="text-gray-400">We deliver the finest quality Atta, Sattu, and Besan directly to your doorstep. Made with traditional methods for authentic taste and nutrition.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Follow Us</h4>
+                    <div class="flex space-x-4">
+                        <a id="whatsapp-link" href="#" target="_blank" class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        <a id="facebook-link" href="#" target="_blank" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a id="instagram-link" href="#" target="_blank" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700 transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                <p id="footer-text" class="text-gray-400">© 2024 SATYAM GOLD. All rights reserved. Delivering freshness to your doorstep.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed inset-y-0 right-0 w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 z-50">
+        <div class="flex flex-col h-full">
+            <!-- Cart Header -->
+            <div class="flex items-center justify-between p-6 border-b">
+                <h2 class="text-xl font-semibold">Your Shopping Cart</h2>
+                <button id="close-cart" class="p-2 hover:bg-gray-100 rounded-full">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Cart Items -->
+            <div id="cart-items" class="flex-1 overflow-y-auto p-6">
+                <div id="empty-cart" class="text-center py-12">
+                    <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 mb-4">Your cart is empty</p>
+                    <p class="text-sm text-gray-400">Looks like you haven't added anything to your cart yet.</p>
+                </div>
+                
+                <div id="cart-list" class="space-y-4 hidden">
+                    <!-- Cart items will be added dynamically -->
+                </div>
+            </div>
+            
+            <!-- Cart Footer -->
+            <div id="cart-footer" class="p-6 border-t hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="font-semibold">Total:</span>
+                    <span id="cart-total" class="text-xl font-bold text-primary">₹0</span>
+                </div>
+                <button id="checkout-btn" class="w-full bg-primary hover:bg-accent text-white py-3 rounded-lg font-medium transition-colors">
+                    Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Backdrop -->
+    <div id="cart-backdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+
+    <!-- Modals will be added here -->
+    <div id="modals-container"></div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p class="mt-4 text-gray-600">Loading...</p>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="/js/api.js"></script>
+    <script src="/js/cart.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>
