@@ -39,6 +39,7 @@ html {
     background-size: cover;
     background-position: center;
     position: relative;
+    aspect-ratio: 16/9; /* Maintain 16:9 ratio for 1920x1080 images */
 }
 
 .hero-slide::before {
@@ -129,8 +130,10 @@ html {
 .product-image {
     width: 100%;
     height: 200px;
-    object-fit: cover;
+    object-fit: contain; /* Changed from cover to contain for better fit */
+    background-color: #f9f9f9;
     transition: transform 0.3s ease;
+    aspect-ratio: 4/3; /* Maintain 4:3 ratio for 800x600 images */
 }
 
 .product-card:hover .product-image {
@@ -587,6 +590,44 @@ html {
         background-position: -200% 0;
     }
 }
+
+/* Logo and Image Guidelines */
+.logo-square {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    background-color: #f9f9f9;
+}
+
+.logo-rectangular {
+    width: 300px;
+    height: 100px;
+    object-fit: contain;
+    background-color: #f9f9f9;
+}
+
+.hero-image-optimal {
+    width: 1920px;
+    height: 1080px;
+    object-fit: cover;
+    aspect-ratio: 16/9;
+}
+
+.product-image-optimal {
+    width: 800px;
+    height: 600px;
+    object-fit: contain;
+    aspect-ratio: 4/3;
+    background-color: #f9f9f9;
+}
+
+/* Image Upload Guidelines (Comments for Admin) */
+/*
+Hero Slider Images: 1920 x 1080 pixels (16:9 ratio)
+Product Images: 800 x 600 pixels (4:3 ratio)
+Logo Square: 200 x 200 pixels
+Logo Rectangular: 300 x 100 pixels
+*/
 
 /* Utility classes */
 .text-gradient {

@@ -446,18 +446,35 @@ class SatyamGoldApp {
         cart.addItem(product, weight);
     }
 
-    // Buy now
+    // Buy now - Require login
     buyNow(productId) {
+        if (!auth.isLoggedIn()) {
+            utils.showToast('Please login to buy products', 'warning');
+            auth.showLoginModal();
+            return;
+        }
+        
         this.addToCart(productId);
         cart.show();
     }
 
-    // Bulk order
+    // Bulk order - Direct WhatsApp redirect
     bulkOrder(productId) {
         const product = this.products.find(p => p.id === productId);
         if (!product) return;
 
-        this.openBulkOrderModal(product);
+        // Create WhatsApp message
+        const message = `Hello! I'm interested in bulk order for:\n\n` +
+                       `📦 Product: ${product.name}\n` +
+                       `💰 Price: ₹${product.price}/${product.unit}\n` +
+                       `📝 Description: ${product.description}\n\n` +
+                       `Please share bulk pricing and availability. Thank you!`;
+        
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/916201530654?text=${encodedMessage}`;
+        
+        // Open WhatsApp in new tab
+        window.open(whatsappUrl, '_blank');
     }
 
     // Load more products

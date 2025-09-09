@@ -478,7 +478,7 @@ class AdminPanel {
                             <input type="url" id="product_image_url" name="image_url" class="form-control"
                                    value="${product ? product.image_url || '' : ''}"
                                    placeholder="https://example.com/image.jpg">
-                            <p class="text-sm text-gray-500 mt-1">Enter image URL</p>
+                            <p class="text-sm text-gray-500 mt-1">Recommended: 800 x 600 pixels (4:3 ratio)</p>
                         </div>
                         <button type="button" onclick="admin.uploadImage('product_image_url')" class="btn btn-secondary">
                             <i class="fas fa-upload mr-2"></i>
@@ -737,7 +737,7 @@ class AdminPanel {
                             <input type="url" id="hero_image_url" name="image_url" class="form-control"
                                    value="${image ? image.image_url || '' : ''}"
                                    placeholder="https://example.com/hero-image.jpg" required>
-                            <p class="text-sm text-gray-500 mt-1">Enter hero image URL</p>
+                            <p class="text-sm text-gray-500 mt-1">Recommended: 1920 x 1080 pixels (16:9 ratio)</p>
                         </div>
                         <button type="button" onclick="admin.uploadImage('hero_image_url')" class="btn btn-secondary">
                             <i class="fas fa-upload mr-2"></i>

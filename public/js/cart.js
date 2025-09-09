@@ -260,6 +260,13 @@ class ShoppingCart {
             return;
         }
 
+        // Require login for checkout
+        if (!auth.isLoggedIn()) {
+            utils.showToast('Please login to proceed with checkout', 'warning');
+            auth.showLoginModal();
+            return;
+        }
+
         const modal = utils.createModal(
             'Checkout',
             this.createCheckoutFormHTML(),
