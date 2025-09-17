@@ -458,8 +458,8 @@ class SatyamGoldApp {
         cart.show();
     }
 
-    // Bulk order - Direct WhatsApp redirect
-    bulkOrder(productId) {
+    // Bulk order - Direct WhatsApp redirect with admin tracking
+    async bulkOrder(productId) {
         const product = this.products.find(p => p.id === productId);
         if (!product) return;
 
@@ -470,11 +470,35 @@ class SatyamGoldApp {
                        `📝 Description: ${product.description}\n\n` +
                        `Please share bulk pricing and availability. Thank you!`;
         
+        // Get user details if available
+        const user = auth.getCurrentUser();
+        const customerName = user?.name || 'Guest User';
+        const customerPhone = user?.phone || 'Not Available';
+        
+        // Save quick order to admin panel
+        try {
+            await fetch('/api/quick-orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    customer_name: customerName,
+                    customer_phone: customerPhone,
+                    message: message
+                })
+            });
+        } catch (error) {
+            console.error('Failed to save quick order:', error);
+        }
+        
         const encodedMessage = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/916201530654?text=${encodedMessage}`;
         
         // Open WhatsApp in new tab
         window.open(whatsappUrl, '_blank');
+        
+        utils.showToast('Bulk order request sent! Check your WhatsApp.', 'success');
     }
 
     // Load more products

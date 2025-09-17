@@ -14,8 +14,16 @@ class AdminPanel {
 
     async init() {
         try {
-            // Check admin authentication (for future implementation)
-            // await this.checkAuth();
+            // Check admin authentication
+            const isAuthenticated = await this.checkAuth();
+            
+            if (!isAuthenticated) {
+                this.showLoginModal();
+                return;
+            }
+            
+            // Show admin content
+            document.getElementById('admin-content').classList.remove('hidden');
             
             // Load initial data
             await this.loadDashboardData();
@@ -30,6 +38,92 @@ class AdminPanel {
         } catch (error) {
             console.error('Admin panel initialization error:', error);
             utils.showToast('Failed to load admin panel', 'error');
+            this.showLoginModal();
+        }
+    }
+
+    // Check admin authentication
+    async checkAuth() {
+        const token = localStorage.getItem('admin_token');
+        
+        if (!token) {
+            return false;
+        }
+        
+        try {
+            const response = await fetch('/api/admin/auth', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            const data = await response.json();
+            return data.success;
+            
+        } catch (error) {
+            console.error('Auth check error:', error);
+            return false;
+        }
+    }
+    
+    // Show admin login modal
+    showLoginModal() {
+        const modal = document.getElementById('admin-login-modal');
+        modal.classList.remove('hidden');
+        
+        // Handle login form submission
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.handleLogin(new FormData(e.target));
+        });
+    }
+    
+    // Handle admin login
+    async handleLogin(formData) {
+        const email = formData.get('email');
+        const password = formData.get('password');
+        
+        try {
+            utils.showLoading();
+            
+            const response = await fetch('/api/admin/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Store token
+                localStorage.setItem('admin_token', data.token);
+                
+                // Hide login modal
+                document.getElementById('admin-login-modal').classList.add('hidden');
+                
+                // Show admin content
+                document.getElementById('admin-content').classList.remove('hidden');
+                
+                // Initialize admin panel
+                await this.loadDashboardData();
+                await this.loadSettings();
+                this.bindEvents();
+                this.applySettingsToUI();
+                
+                utils.showToast('Login successful!', 'success');
+                
+            } else {
+                utils.showToast(data.message || 'Login failed', 'error');
+            }
+            
+        } catch (error) {
+            console.error('Login error:', error);
+            utils.showToast('Login failed', 'error');
+        } finally {
+            utils.hideLoading();
         }
     }
 
@@ -67,6 +161,12 @@ class AdminPanel {
             utils.debounce(this.filterOrders.bind(this), 500)
         );
 
+        // Quick order filters
+        document.getElementById('quick-order-status-filter')?.addEventListener('change', this.renderQuickOrders.bind(this));
+        document.getElementById('quick-order-search')?.addEventListener('input', 
+            utils.debounce(this.renderQuickOrders.bind(this), 500)
+        );
+
         // Logout
         document.getElementById('logout-btn').addEventListener('click', this.logout.bind(this));
     }
@@ -96,6 +196,9 @@ class AdminPanel {
         switch (sectionName) {
             case 'orders':
                 this.loadOrders();
+                break;
+            case 'quick-orders':
+                this.loadQuickOrders();
                 break;
             case 'products':
                 this.loadProducts();
@@ -1039,6 +1142,262 @@ class AdminPanel {
             // Redirect to main site
             window.location.href = '/';
         }
+    }
+
+    // Quick Orders Management
+    async loadQuickOrders() {
+        try {
+            const response = await fetch('/api/quick-orders');
+            const data = await response.json();
+            
+            if (data.success) {
+                this.quickOrders = data.orders;
+                this.renderQuickOrders();
+            }
+        } catch (error) {
+            console.error('Failed to load quick orders:', error);
+            utils.showToast('Failed to load quick orders', 'error');
+        }
+    }
+
+    renderQuickOrders() {
+        const container = document.getElementById('quick-orders-list');
+        
+        if (!this.quickOrders || this.quickOrders.length === 0) {
+            container.innerHTML = `
+                <div class="p-8 text-center text-gray-500">
+                    <i class="fas fa-inbox text-4xl mb-4"></i>
+                    <p>No quick order messages found</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const filteredOrders = this.filterQuickOrders();
+        
+        if (filteredOrders.length === 0) {
+            container.innerHTML = `
+                <div class="p-8 text-center text-gray-500">
+                    <i class="fas fa-search text-4xl mb-4"></i>
+                    <p>No orders match your search criteria</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${filteredOrders.map(order => `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    ${new Date(order.created_at).toLocaleDateString()} <br>
+                                    <span class="text-xs text-gray-500">${new Date(order.created_at).toLocaleTimeString()}</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <div class="font-medium text-gray-900">${order.customer_name}</div>
+                                    <div class="text-gray-500">${order.customer_phone}</div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                                    <div class="truncate" title="${order.message}">${order.message}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${this.getQuickOrderStatusClass(order.status)}">
+                                        ${order.status}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <button onclick="admin.showQuickOrderDetails(${order.id})" class="text-primary hover:text-accent">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    ${order.status === 'pending' ? `
+                                        <button onclick="admin.updateQuickOrderStatus(${order.id}, 'processed')" class="text-green-600 hover:text-green-700" title="Mark as Processed">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button onclick="admin.updateQuickOrderStatus(${order.id}, 'ignored')" class="text-red-600 hover:text-red-700" title="Mark as Ignored">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    ` : ''}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    filterQuickOrders() {
+        if (!this.quickOrders) return [];
+        
+        const statusFilter = document.getElementById('quick-order-status-filter')?.value || '';
+        const searchFilter = document.getElementById('quick-order-search')?.value.toLowerCase() || '';
+        
+        return this.quickOrders.filter(order => {
+            const matchesStatus = !statusFilter || order.status === statusFilter;
+            const matchesSearch = !searchFilter || 
+                order.customer_name.toLowerCase().includes(searchFilter) ||
+                order.customer_phone.includes(searchFilter) ||
+                order.message.toLowerCase().includes(searchFilter);
+            
+            return matchesStatus && matchesSearch;
+        });
+    }
+
+    getQuickOrderStatusClass(status) {
+        switch (status) {
+            case 'pending':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'processed':
+                return 'bg-green-100 text-green-800';
+            case 'ignored':
+                return 'bg-red-100 text-red-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    }
+
+    async showQuickOrderDetails(orderId) {
+        const order = this.quickOrders.find(o => o.id === orderId);
+        if (!order) return;
+
+        const modal = utils.createModal(
+            'Quick Order Details',
+            `
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-2">Customer Information</h4>
+                        <p><strong>Name:</strong> ${order.customer_name}</p>
+                        <p><strong>Phone:</strong> ${order.customer_phone}</p>
+                        <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-2">Order Message</h4>
+                        <p class="whitespace-pre-wrap">${order.message}</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-2">Current Status</h4>
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${this.getQuickOrderStatusClass(order.status)}">
+                            ${order.status}
+                        </span>
+                    </div>
+                    
+                    ${order.admin_notes ? `
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Admin Notes</h4>
+                            <p class="whitespace-pre-wrap">${order.admin_notes}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div>
+                        <h4 class="font-semibold mb-2">Add Admin Notes</h4>
+                        <textarea id="admin-notes-input" class="form-control" rows="3" 
+                                  placeholder="Add notes about this order...">${order.admin_notes || ''}</textarea>
+                    </div>
+                </div>
+            `,
+            [
+                {
+                    text: 'Close',
+                    class: 'btn-secondary',
+                    onclick: 'this.closest(\\.modal\\).remove()'
+                },
+                {
+                    text: 'Save Notes',
+                    class: 'btn-primary',
+                    onclick: `admin.saveQuickOrderNotes(${order.id})`
+                }
+            ]
+        );
+    }
+
+    async saveQuickOrderNotes(orderId) {
+        const notes = document.getElementById('admin-notes-input')?.value || '';
+        
+        try {
+            utils.showLoading();
+            
+            const response = await fetch('/api/quick-orders', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: orderId,
+                    admin_notes: notes,
+                    status: this.quickOrders.find(o => o.id === orderId)?.status
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                utils.showToast('Notes saved successfully', 'success');
+                document.querySelector('.modal')?.remove();
+                await this.loadQuickOrders();
+            } else {
+                throw new Error(data.message);
+            }
+            
+        } catch (error) {
+            console.error('Failed to save notes:', error);
+            utils.showToast('Failed to save notes', 'error');
+        } finally {
+            utils.hideLoading();
+        }
+    }
+
+    async updateQuickOrderStatus(orderId, newStatus) {
+        const order = this.quickOrders.find(o => o.id === orderId);
+        if (!order) return;
+
+        try {
+            utils.showLoading();
+            
+            const response = await fetch('/api/quick-orders', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: orderId,
+                    status: newStatus,
+                    admin_notes: order.admin_notes || ''
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                utils.showToast(`Order marked as ${newStatus}`, 'success');
+                await this.loadQuickOrders();
+            } else {
+                throw new Error(data.message);
+            }
+            
+        } catch (error) {
+            console.error('Failed to update status:', error);
+            utils.showToast('Failed to update status', 'error');
+        } finally {
+            utils.hideLoading();
+        }
+    }
+
+    async refreshQuickOrders() {
+        await this.loadQuickOrders();
+        utils.showToast('Quick orders refreshed', 'success');
     }
 }
 
