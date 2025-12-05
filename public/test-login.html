@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login Button - Satyam Gold</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #F97316;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            width: 100%;
+        }
+        .test-button:hover {
+            background: #EA580C;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f0f8ff;
+            border-left: 4px solid #007acc;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Login Button Test Page</h1>
+        <p>Is page pe login button test kar sakte hain:</p>
+        
+        <div class="status" id="status">
+            Ready to test...
+        </div>
+
+        <button class="test-button" onclick="testLoginButton()">
+            🚀 Test Login Button Click
+        </button>
+
+        <button class="test-button" onclick="directLoginModal()">
+            📱 Direct Login Modal Test
+        </button>
+
+        <button class="test-button" onclick="goToMainSite()">
+            🏠 Go to Main Website
+        </button>
+
+        <div id="test-results" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function updateStatus(message, color = '#007acc') {
+            const status = document.getElementById('status');
+            status.innerHTML = message;
+            status.style.borderLeftColor = color;
+        }
+
+        function testLoginButton() {
+            updateStatus('Testing main website login button...', '#ff6600');
+            
+            // Try to access main website's login function
+            try {
+                window.parent.postMessage({action: 'testLogin'}, '*');
+                updateStatus('✅ Login button test signal sent!', '#00cc00');
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message, '#cc0000');
+            }
+        }
+
+        function directLoginModal() {
+            updateStatus('Opening direct login modal...', '#ff6600');
+            
+            // Create a direct login modal for testing
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 10px; width: 350px; text-align: center;">
+                        <h2>Login with Phone</h2>
+                        <div class="pe_signin_button" data-client-id="12468569854913964682"></div>
+                        <div style="margin-top: 15px;">
+                            <button onclick="this.closest('div').remove()" style="padding: 10px 20px; background: #ccc; border: none; border-radius: 5px;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Load Phone.email SDK
+            if (!document.querySelector('script[src*="phone.email"]')) {
+                const script = document.createElement('script');
+                script.src = 'https://www.phone.email/sign_in_button_v1.js';
+                document.head.appendChild(script);
+                
+                script.onload = () => {
+                    window.phoneEmailListener = function(userObj) {
+                        alert('Phone Verification Successful! Phone: ' + JSON.stringify(userObj));
+                    };
+                };
+            }
+
+            updateStatus('✅ Direct login modal opened!', '#00cc00');
+        }
+
+        function goToMainSite() {
+            window.location.href = '/';
+        }
+
+        // Listen for messages from main website
+        window.addEventListener('message', function(event) {
+            if (event.data.action === 'loginResult') {
+                updateStatus('📩 Message from main site: ' + event.data.message, '#0066cc');
+            }
+        });
+    </script>
+
+    <!-- Load Phone.email SDK for testing -->
+    <script src="https://www.phone.email/sign_in_button_v1.js"></script>
+    <script>
+        // Global callback for Phone.email
+        function phoneEmailListener(userObj) {
+            updateStatus('🎉 Phone.email Success: ' + userObj.user_json_url, '#00cc00');
+        }
+    </script>
+</body>
+</html>

@@ -300,6 +300,12 @@ class ShoppingCart {
             </div>
         `).join('');
 
+        // Get current user details for auto-fill
+        const currentUser = auth.getCurrentUser();
+        const userName = currentUser?.name || '';
+        const userPhone = currentUser?.phone_number || currentUser?.phone || '';
+        const userEmail = currentUser?.email || '';
+
         return `
             <div class="space-y-6">
                 <!-- Order Summary -->
@@ -318,29 +324,46 @@ class ShoppingCart {
                 <form id="checkout-form" class="space-y-4">
                     <div class="form-group">
                         <label for="customer_name">Full Name *</label>
-                        <input type="text" id="customer_name" name="customer_name" class="form-control" required>
+                        <input type="text" id="customer_name" name="customer_name" class="form-control" 
+                               value="${userName}" required>
+                        ${userName ? '<p class="text-sm text-green-600 mt-1"><i class="fas fa-check-circle mr-1"></i>Auto-filled from your profile</p>' : ''}
                     </div>
 
                     <div class="form-group">
-                        <label for="customer_email">Email Address *</label>
-                        <input type="email" id="customer_email" name="customer_email" class="form-control" required>
+                        <label for="customer_email">Email Address (Optional)</label>
+                        <input type="email" id="customer_email" name="customer_email" class="form-control" 
+                               value="${userEmail}" placeholder="Enter your email address">
                     </div>
 
                     <div class="form-group">
                         <label for="customer_phone">Phone Number *</label>
-                        <input type="tel" id="customer_phone" name="customer_phone" class="form-control" required>
+                        <input type="tel" id="customer_phone" name="customer_phone" class="form-control" 
+                               value="${userPhone}" required readonly>
+                        ${userPhone ? '<p class="text-sm text-green-600 mt-1"><i class="fas fa-check-circle mr-1"></i>Verified phone number from login</p>' : ''}
                     </div>
 
                     <div class="form-group">
                         <label for="customer_address">Delivery Address *</label>
                         <textarea id="customer_address" name="customer_address" rows="4" class="form-control" required
-                                  placeholder="Please provide your complete address including landmark, city, state, and PIN code"></textarea>
+                                  placeholder="Please provide your complete address including:&#10;• House/Building No. and Street&#10;• Landmark (if any)&#10;• City, State&#10;• PIN Code"></textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="order_notes">Special Instructions (Optional)</label>
                         <textarea id="order_notes" name="order_notes" rows="2" class="form-control" 
-                                  placeholder="Any special instructions for delivery"></textarea>
+                                  placeholder="Any special instructions for delivery (e.g., delivery time preference, contact person, etc.)"></textarea>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h5 class="font-semibold text-blue-800 mb-2">
+                            <i class="fas fa-info-circle mr-2"></i>Order Information
+                        </h5>
+                        <ul class="text-sm text-blue-700 space-y-1">
+                            <li>• We will call you to confirm the order before processing</li>
+                            <li>• Delivery typically takes 1-2 business days</li>
+                            <li>• Cash on Delivery available</li>
+                            <li>• Free delivery on orders above ₹500</li>
+                        </ul>
                     </div>
                 </form>
             </div>

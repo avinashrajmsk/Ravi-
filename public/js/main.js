@@ -363,71 +363,59 @@ class SatyamGoldApp {
         grid.innerHTML = this.products.map(product => this.createProductCard(product)).join('');
     }
 
-    // Create product card HTML
+    // Create product card HTML - New Design
     createProductCard(product) {
         const weightOptions = product.weight_options ? product.weight_options.split(',') : ['1'];
         const isInStock = product.in_stock === 1;
+        const originalPrice = product.original_price || Math.round(product.price * 1.08);
+        const discount = Math.round(((originalPrice - product.price) / originalPrice) * 100);
+        const lovedBy = product.loved_by || 0;
         
         return `
-            <div class="product-card animate-fadeInUp">
-                ${isInStock ? 
-                    '<div class="stock-badge">In Stock</div>' : 
-                    '<div class="stock-badge out-of-stock">Out of Stock</div>'
-                }
+            <div class="product-card" data-product-id="${product.id}">
+                ${discount > 0 ? `<div class="discount-badge">${discount}% OFF</div>` : ''}
                 
-                <div class="relative overflow-hidden">
-                    <img src="${product.image_url}" alt="${product.name}" class="product-image"
+                <div class="product-image-container">
+                    <img src="${product.image_url}" alt="${product.name}" 
                          onerror="this.src='/images/placeholder-product.jpg'">
                 </div>
                 
-                <div class="product-info">
+                <div class="product-details">
                     <h3 class="product-title">${product.name}</h3>
-                    <p class="product-description">${product.description || ''}</p>
+                    <div class="product-weight">${weightOptions[0]} ${product.unit}</div>
                     
-                    ${product.rating ? `
-                        <div class="rating">
-                            <div class="stars">
-                                ${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5 - Math.floor(product.rating))}
-                            </div>
-                            <span class="rating-text">${product.rating}</span>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="product-price">₹${product.price}/${product.unit}</div>
-                    
-                    ${weightOptions.length > 1 ? `
-                        <div class="weight-selector">
-                            <label>Select Weight:</label>
-                            <div class="weight-options">
-                                ${weightOptions.map(weight => `
-                                    <button class="weight-option ${weight === '1' ? 'selected' : ''}" 
-                                            onclick="this.parentElement.querySelectorAll('.weight-option').forEach(btn => btn.classList.remove('selected')); this.classList.add('selected')">
-                                        ${weight}${product.unit}
-                                    </button>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="product-actions">
-                        ${isInStock ? `
-                            <button class="btn btn-primary" onclick="app.addToCart(${product.id})">
-                                <i class="fas fa-cart-plus"></i>
-                                Add to Cart
-                            </button>
-                            <button class="btn btn-secondary" onclick="app.buyNow(${product.id})">
-                                Buy Now
-                            </button>
-                            <button class="btn btn-success" onclick="app.bulkOrder(${product.id})">
-                                <i class="fas fa-boxes"></i>
-                                Bulk Order
-                            </button>
-                        ` : `
-                            <button class="btn" style="background: #9CA3AF; color: white;" disabled>
-                                Out of Stock
-                            </button>
-                        `}
+                    <div class="price-section">
+                        <span class="current-price">₹${product.price}</span>
+                        ${discount > 0 ? `<span class="original-price">₹${originalPrice}</span>` : ''}
                     </div>
+                    
+                    <div class="loved-by-section">
+                        <i class="fas fa-heart loved-heart ${lovedBy > 0 ? 'active' : 'inactive'}" 
+                           onclick="app.toggleLove(${product.id})" 
+                           data-product-id="${product.id}"></i>
+                        <span class="loved-text">Loved by <span class="loved-count" id="loved-count-${product.id}">${lovedBy}k</span></span>
+                    </div>
+                    
+                    ${isInStock ? `
+                        <div class="product-buttons">
+                            <div class="product-buttons-row">
+                                <button class="btn-add-cart" onclick="app.addToCart(${product.id})">
+                                    ADD TO CART
+                                </button>
+                                <button class="btn-buy-now" onclick="app.buyNow(${product.id})">
+                                    BUY NOW
+                                </button>
+                            </div>
+                            <button class="btn-bulk-order" onclick="app.bulkOrder(${product.id})">
+                                <i class="fab fa-whatsapp"></i>
+                                BULK ORDER
+                            </button>
+                        </div>
+                    ` : `
+                        <button class="btn-add-cart" style="background: #9CA3AF;" disabled>
+                            OUT OF STOCK
+                        </button>
+                    `}
                 </div>
             </div>
         `;
@@ -473,7 +461,7 @@ class SatyamGoldApp {
         // Get user details if available
         const user = auth.getCurrentUser();
         const customerName = user?.name || 'Guest User';
-        const customerPhone = user?.phone || 'Not Available';
+        const customerPhone = user?.phone_number || user?.phone || 'Not Available';
         
         // Save quick order to admin panel
         try {
@@ -499,6 +487,72 @@ class SatyamGoldApp {
         window.open(whatsappUrl, '_blank');
         
         utils.showToast('Bulk order request sent! Check your WhatsApp.', 'success');
+    }
+
+    // Toggle love (heart icon) - requires login
+    async toggleLove(productId) {
+        // Check if user is logged in
+        if (!auth.isLoggedIn()) {
+            utils.showToast('Please login to add products to your favorites', 'warning');
+            auth.showLoginModal();
+            return;
+        }
+
+        try {
+            const product = this.products.find(p => p.id === productId);
+            if (!product) return;
+
+            const heartIcon = document.querySelector(`.loved-heart[data-product-id="${productId}"]`);
+            const lovedCountEl = document.getElementById(`loved-count-${productId}`);
+            
+            if (!heartIcon || !lovedCountEl) return;
+
+            // Toggle loved status
+            const isCurrentlyLoved = heartIcon.classList.contains('active');
+            const currentCount = parseInt(lovedCountEl.textContent) || 0;
+            
+            if (isCurrentlyLoved) {
+                // Unlike - decrease count
+                const newCount = Math.max(0, currentCount - 1);
+                lovedCountEl.textContent = newCount + 'k';
+                heartIcon.classList.remove('active');
+                heartIcon.classList.add('inactive');
+                product.loved_by = newCount;
+                utils.showToast('Removed from favorites', 'info');
+            } else {
+                // Like - increase count
+                const newCount = currentCount + 1;
+                lovedCountEl.textContent = newCount + 'k';
+                heartIcon.classList.remove('inactive');
+                heartIcon.classList.add('active');
+                product.loved_by = newCount;
+                utils.showToast('Added to favorites!', 'success');
+            }
+
+            // Update in backend
+            await this.updateProductLoved(productId, product.loved_by);
+
+        } catch (error) {
+            console.error('Toggle love error:', error);
+            utils.showToast('Failed to update. Please try again.', 'error');
+        }
+    }
+
+    // Update product loved count in backend
+    async updateProductLoved(productId, lovedCount) {
+        try {
+            await fetch(`/api/products/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    loved_by: lovedCount
+                })
+            });
+        } catch (error) {
+            console.error('Failed to update loved count:', error);
+        }
     }
 
     // Load more products

@@ -22,6 +22,7 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/products.css">
     
     <!-- Tailwind Config -->
     <script>
@@ -321,9 +322,24 @@
     </div>
 
     <!-- JavaScript Files -->
+    <script src="/js/utils.js"></script>
     <script src="/js/api.js"></script>
-    <script src="/js/phone-auth.js"></script>
+    <script src="/js/real-phone-auth.js"></script>
     <script src="/js/cart.js"></script>
     <script src="/js/main.js"></script>
+    <script>
+        // Initialize Real Phone.email Authentication
+        document.addEventListener('DOMContentLoaded', () => {
+            // Use real Phone.email authentication
+            window.auth = window.realPhoneAuth;
+            
+            // Force initialize auth button
+            if (window.auth && window.auth.initAuthButton) {
+                window.auth.initAuthButton();
+            }
+            
+            console.log('Real Phone.email SMS OTP authentication initialized');
+        });
+    </script>
 </body>
 </html>

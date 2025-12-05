@@ -544,11 +544,20 @@ class AdminPanel {
                 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="form-group">
-                        <label for="product_price">Price *</label>
+                        <label for="product_price">Current Price *</label>
                         <input type="number" id="product_price" name="price" class="form-control" 
                                value="${product ? product.price : ''}" step="0.01" required>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="product_original_price">Original Price (for discount)</label>
+                        <input type="number" id="product_original_price" name="original_price" class="form-control" 
+                               value="${product ? (product.original_price || '') : ''}" step="0.01" 
+                               placeholder="Leave empty for no discount">
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4">
                     <div class="form-group">
                         <label for="product_unit">Unit</label>
                         <select id="product_unit" name="unit" class="form-control">
@@ -557,6 +566,14 @@ class AdminPanel {
                             <option value="piece" ${product && product.unit === 'piece' ? 'selected' : ''}>Piece</option>
                             <option value="packet" ${product && product.unit === 'packet' ? 'selected' : ''}>Packet</option>
                         </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product_loved_by">Loved By (in thousands)</label>
+                        <input type="number" id="product_loved_by" name="loved_by" class="form-control" 
+                               value="${product ? (product.loved_by || 0) : 0}" step="1" min="0"
+                               placeholder="e.g., 5 for 5k">
+                        <p class="text-sm text-gray-500 mt-1">Enter number only, will display as "5k"</p>
                     </div>
                 </div>
                 
@@ -641,11 +658,13 @@ class AdminPanel {
                 name: formData.get('name'),
                 description: formData.get('description'),
                 price: parseFloat(formData.get('price')),
+                original_price: formData.get('original_price') ? parseFloat(formData.get('original_price')) : null,
                 unit: formData.get('unit'),
                 category: formData.get('category'),
                 weight_options: formData.get('weight_options'),
                 image_url: formData.get('image_url'),
-                in_stock: formData.has('in_stock')
+                in_stock: formData.has('in_stock'),
+                loved_by: parseInt(formData.get('loved_by')) || 0
             };
             
             let response;
