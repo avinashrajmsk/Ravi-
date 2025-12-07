@@ -72,11 +72,15 @@ class AdminPanel {
         const modal = document.getElementById('admin-login-modal');
         modal.classList.remove('hidden');
         
-        // Handle login form submission
-        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.handleLogin(new FormData(e.target));
-        });
+        // Handle login form submission (using once to prevent duplicate listeners)
+        const form = document.getElementById('admin-login-form');
+        if (form && !form.dataset.listenerAttached) {
+            form.dataset.listenerAttached = 'true';
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.handleLogin(new FormData(e.target));
+            });
+        }
     }
     
     // Handle admin login
