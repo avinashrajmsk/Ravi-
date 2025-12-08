@@ -393,7 +393,7 @@ class SatyamGoldApp {
                         <i class="fas fa-heart loved-heart ${lovedBy > 0 ? 'active' : 'inactive'}" 
                            onclick="app.toggleLove(${product.id})" 
                            data-product-id="${product.id}"></i>
-                        <span class="loved-text">Loved by <span class="loved-count" id="loved-count-${product.id}">${lovedBy}k</span></span>
+                        <span class="loved-text">Loved by <span class="loved-count" id="loved-count-${product.id}">${lovedBy}</span></span>
                     </div>
                     
                     ${isInStock ? `

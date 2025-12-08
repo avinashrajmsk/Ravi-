@@ -8,6 +8,7 @@ class AdminPanel {
         this.products = [];
         this.heroImages = [];
         this.settings = {};
+        this.loginFormBound = false; // Flag to prevent duplicate binding
         
         this.init();
     }
@@ -72,15 +73,45 @@ class AdminPanel {
         const modal = document.getElementById('admin-login-modal');
         modal.classList.remove('hidden');
         
-        // Handle login form submission (using once to prevent duplicate listeners)
-        const form = document.getElementById('admin-login-form');
-        if (form && !form.dataset.listenerAttached) {
-            form.dataset.listenerAttached = 'true';
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await this.handleLogin(new FormData(e.target));
-            });
+        // Bind login form if not already bound
+        if (!this.loginFormBound) {
+            this.bindLoginForm();
+            this.loginFormBound = true;
         }
+    }
+    
+    // Bind login form submission
+    bindLoginForm() {
+        const form = document.getElementById('admin-login-form');
+        if (!form) {
+            console.error('Login form not found!');
+            return;
+        }
+        
+        // Remove any existing listener first
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+        
+        // Add fresh event listener
+        newForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('Form submitted!');
+            
+            const formData = new FormData(e.target);
+            const email = formData.get('email');
+            const password = formData.get('password');
+            
+            console.log('Login attempt:', { email, password: password ? '***' : 'empty' });
+            
+            if (!email || !password) {
+                utils.showToast('Please enter email and password', 'error');
+                return;
+            }
+            
+            await this.handleLogin(formData);
+        });
+        
+        console.log('Login form bound successfully');
     }
     
     // Handle admin login

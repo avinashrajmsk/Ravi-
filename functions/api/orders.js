@@ -6,12 +6,21 @@ export async function onRequestGet({ request, env, params }) {
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get('limit')) || 20;
     const offset = parseInt(url.searchParams.get('offset')) || 0;
+    const userPhone = url.searchParams.get('phone'); // Filter by user phone
     
-    const { results } = await db.prepare(`
-      SELECT * FROM orders 
-      ORDER BY created_at DESC 
-      LIMIT ? OFFSET ?
-    `).bind(limit, offset).all();
+    let query = 'SELECT * FROM orders';
+    let bindings = [];
+    
+    // If phone parameter provided, filter by customer phone
+    if (userPhone) {
+      query += ' WHERE customer_phone = ?';
+      bindings.push(userPhone);
+    }
+    
+    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    bindings.push(limit, offset);
+    
+    const { results } = await db.prepare(query).bind(...bindings).all();
     
     // Parse JSON items for each order
     const orders = results.map(order => ({
@@ -21,7 +30,8 @@ export async function onRequestGet({ request, env, params }) {
     
     return Response.json({
       success: true,
-      orders: orders
+      orders: orders,
+      count: orders.length
     });
     
   } catch (error) {

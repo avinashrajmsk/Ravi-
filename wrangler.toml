@@ -9,7 +9,7 @@ command = ""
 [[d1_databases]]
 binding = "DB"
 database_name = "satyam-gold-production"
-database_id = "your-database-id-here"
+database_id = "c849a4c2-e7a8-47eb-acf1-77fc6276b0fd"
 
 [[kv_namespaces]]
 binding = "KV"

@@ -171,7 +171,7 @@ class RealPhoneAuthManager {
         document.head.appendChild(newScript);
     }
 
-    handlePhoneEmailSuccess(userObj) {
+    async handlePhoneEmailSuccess(userObj) {
         console.log('Processing authentication...');
         
         try {
@@ -179,14 +179,42 @@ class RealPhoneAuthManager {
             let phone = userObj.phone_number || userObj.user_phone_number || userObj.phone || '';
             console.log('Phone:', phone);
             
-            // Check existing user
+            // Check database first for existing user
+            try {
+                const response = await fetch(`/api/users?phone_number=${encodeURIComponent(phone)}`);
+                const result = await response.json();
+                
+                if (result.success && result.user) {
+                    // Existing user found in database - direct login
+                    console.log('Existing user from database - direct login');
+                    const existingUser = {
+                        id: result.user.id,
+                        phone: result.user.phone_number,
+                        name: result.user.name,
+                        email: result.user.email,
+                        address: result.user.address,
+                        pincode: result.user.pincode,
+                        city: result.user.city,
+                        state: result.user.state,
+                        verified: true,
+                        loginTime: new Date().toISOString(),
+                        isNewUser: false
+                    };
+                    await this.completeLogin(existingUser);
+                    return;
+                }
+            } catch (error) {
+                console.log('User not found in database, checking localStorage...');
+            }
+            
+            // Check localStorage as fallback
             const allUsers = JSON.parse(localStorage.getItem('satyam_all_users') || '{}');
             const existingUser = phone ? allUsers[phone] : null;
             
             if (existingUser) {
-                // Existing user - direct login
-                console.log('Existing user - direct login');
-                this.completeLogin(existingUser);
+                // Existing user from localStorage - direct login
+                console.log('Existing user from localStorage - direct login');
+                await this.completeLogin(existingUser);
             } else {
                 // New user - collect name
                 console.log('New user - collecting name');
@@ -278,8 +306,38 @@ class RealPhoneAuthManager {
         this.completeLogin(userData);
     }
 
-    completeLogin(userData) {
+    async completeLogin(userData) {
         console.log('Login complete:', userData);
+        
+        // Save to database first
+        try {
+            const response = await fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phone_number: userData.phone,
+                    name: userData.name,
+                    email: userData.email || null
+                })
+            });
+            
+            const result = await response.json();
+            console.log('Database save result:', result);
+            
+            if (result.success && result.user) {
+                // Update userData with database info
+                userData.id = result.user.id;
+                userData.address = result.user.address;
+                userData.pincode = result.user.pincode;
+                userData.city = result.user.city;
+                userData.state = result.user.state;
+            }
+        } catch (error) {
+            console.error('Failed to save to database:', error);
+            // Continue with login even if database save fails
+        }
         
         // Save session
         localStorage.setItem('satyam_user_data', JSON.stringify(userData));

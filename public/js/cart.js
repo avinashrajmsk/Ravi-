@@ -300,11 +300,13 @@ class ShoppingCart {
             </div>
         `).join('');
 
-        // Get current user details for auto-fill
+        // Get current user details for auto-fill (from localStorage with database data)
         const currentUser = auth.getCurrentUser();
         const userName = currentUser?.name || '';
         const userPhone = currentUser?.phone_number || currentUser?.phone || '';
         const userEmail = currentUser?.email || '';
+        const userAddress = currentUser?.address || '';
+        const userPincode = currentUser?.pincode || '';
 
         return `
             <div class="space-y-6">
@@ -345,7 +347,16 @@ class ShoppingCart {
                     <div class="form-group">
                         <label for="customer_address">Delivery Address *</label>
                         <textarea id="customer_address" name="customer_address" rows="4" class="form-control" required
-                                  placeholder="Please provide your complete address including:&#10;• House/Building No. and Street&#10;• Landmark (if any)&#10;• City, State&#10;• PIN Code"></textarea>
+                                  placeholder="Please provide your complete address including:&#10;• House/Building No. and Street&#10;• Landmark (if any)&#10;• City, State">${userAddress}</textarea>
+                        ${userAddress ? '<p class="text-sm text-green-600 mt-1"><i class="fas fa-check-circle mr-1"></i>Auto-filled from your previous order</p>' : ''}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer_pincode">PIN Code *</label>
+                        <input type="text" id="customer_pincode" name="customer_pincode" class="form-control" 
+                               value="${userPincode}" pattern="[0-9]{6}" maxlength="6" required
+                               placeholder="Enter 6-digit PIN code">
+                        ${userPincode ? '<p class="text-sm text-green-600 mt-1"><i class="fas fa-check-circle mr-1"></i>Auto-filled from your previous order</p>' : ''}
                     </div>
 
                     <div class="form-group">
@@ -361,7 +372,7 @@ class ShoppingCart {
                         <ul class="text-sm text-blue-700 space-y-1">
                             <li>• We will call you to confirm the order before processing</li>
                             <li>• Delivery typically takes 1-2 business days</li>
-                            <li>• Cash on Delivery available</li>
+                            <li>• <strong>Cash on Delivery</strong> available</li>
                             <li>• Free delivery on orders above ₹500</li>
                         </ul>
                     </div>
@@ -430,16 +441,51 @@ class ShoppingCart {
         try {
             utils.showLoading();
             
+            const customerAddress = formData.get('customer_address');
+            const customerPincode = formData.get('customer_pincode');
+            const customerPhone = formData.get('customer_phone');
+            const customerName = formData.get('customer_name');
+            const customerEmail = formData.get('customer_email');
+            
+            // Save address to user profile in database
+            try {
+                await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone_number: customerPhone,
+                        name: customerName,
+                        email: customerEmail,
+                        address: customerAddress,
+                        pincode: customerPincode
+                    })
+                });
+                
+                // Update local storage with new address data
+                const currentUser = auth.getCurrentUser();
+                if (currentUser) {
+                    currentUser.address = customerAddress;
+                    currentUser.pincode = customerPincode;
+                    localStorage.setItem('satyam_user_data', JSON.stringify(currentUser));
+                }
+            } catch (err) {
+                console.error('Failed to update user address:', err);
+                // Continue with order even if address save fails
+            }
+            
             const orderData = {
                 order_number: utils.generateOrderNumber(),
-                customer_name: formData.get('customer_name'),
-                customer_email: formData.get('customer_email'),
-                customer_phone: formData.get('customer_phone'),
-                customer_address: formData.get('customer_address'),
+                customer_name: customerName,
+                customer_email: customerEmail,
+                customer_phone: customerPhone,
+                customer_address: customerAddress + '\nPIN: ' + customerPincode,
                 order_notes: formData.get('order_notes'),
                 items: this.items,
                 total_amount: this.getTotal(),
-                status: 'Pending'
+                status: 'Pending',
+                payment_method: 'Cash on Delivery'
             };
 
             const result = await api.createOrder(orderData);
@@ -483,6 +529,26 @@ class ShoppingCart {
                             <div><strong>Status:</strong> <span class="text-yellow-600">${order.status}</span></div>
                         </div>
                     </div>
+                    
+                    <p class="text-sm text-gray-500">
+                        We'll contact you shortly to confirm your order details and delivery time.
+                        You can track your order status by contacting us.
+                    </p>
+                </div>
+            `,
+            [
+                {
+                    text: 'Continue Shopping',
+                    class: 'btn-primary',
+                    onclick: 'this.closest(\'.modal\').remove(); utils.scrollToSection(\'products\')'
+                }
+            ]
+        );
+    }
+}
+
+// Initialize cart
+window.cart = new ShoppingCart();v>
                     
                     <p class="text-sm text-gray-500">
                         We'll contact you shortly to confirm your order details and delivery time.
