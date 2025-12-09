@@ -114,9 +114,10 @@ class RealPhoneAuthManager {
                     <div class="p-8">
                         <!-- Logo -->
                         <div class="flex justify-center mb-6">
-                            <img src="https://base44.app/api/apps/68a375197577ce82d3f4980e/files/04925dbc9_100012467.png" 
+                            <img id="login-logo" src="" 
                                  alt="Satyam Gold" 
-                                 class="w-20 h-20 rounded-full shadow-lg">
+                                 class="w-20 h-20 rounded-full shadow-lg object-contain"
+                                 onerror="this.src='https://base44.app/api/apps/68a375197577ce82d3f4980e/files/04925dbc9_100012467.png'">
                         </div>
                         
                         <!-- Title -->
@@ -146,10 +147,35 @@ class RealPhoneAuthManager {
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         document.body.style.overflow = 'hidden';
         
-        // Wait and reload SDK for modal
+        // Load logo from site settings
         setTimeout(() => {
+            this.loadSiteLogo();
             this.reloadWidgetInModal();
         }, 300);
+    }
+    
+    loadSiteLogo() {
+        // Try to get logo from site settings
+        fetch('/api/settings')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.settings) {
+                    const logoSetting = data.settings.find(s => s.key === 'site_logo');
+                    if (logoSetting && logoSetting.value) {
+                        const logoImg = document.getElementById('login-logo');
+                        if (logoImg) {
+                            logoImg.src = logoSetting.value;
+                        }
+                    }
+                }
+            })
+            .catch(err => {
+                console.log('Failed to load site logo, using default');
+                const logoImg = document.getElementById('login-logo');
+                if (logoImg) {
+                    logoImg.src = 'https://base44.app/api/apps/68a375197577ce82d3f4980e/files/04925dbc9_100012467.png';
+                }
+            });
     }
 
     reloadWidgetInModal() {

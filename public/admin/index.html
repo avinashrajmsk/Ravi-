@@ -539,6 +539,85 @@
     <!-- JavaScript Files -->
     <script src="/js/api.js"></script>
     <script src="/js/admin-utils.js"></script>
-    <script src="/js/admin.js"></script>
+    
+    <!-- Inline Login Handler - Direct Implementation -->
+    <script>
+        console.log('Admin page loaded');
+        
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM ready, setting up login form');
+            
+            const loginForm = document.getElementById('admin-login-form');
+            const loginModal = document.getElementById('admin-login-modal');
+            const adminContent = document.getElementById('admin-content');
+            
+            // Show login modal on page load
+            loginModal.classList.remove('hidden');
+            
+            // Direct form submit handler
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                console.log('Form submitted!');
+                
+                const email = document.getElementById('admin_email').value;
+                const password = document.getElementById('admin_password').value;
+                
+                console.log('Login attempt with:', email);
+                
+                if (!email || !password) {
+                    alert('Please enter email and password');
+                    return;
+                }
+                
+                try {
+                    // Show loading
+                    const submitBtn = loginForm.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Logging in...';
+                    
+                    const response = await fetch('/api/admin/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await response.json();
+                    console.log('Login response:', data);
+                    
+                    if (data.success) {
+                        // Save token
+                        localStorage.setItem('admin_token', data.token);
+                        
+                        // Hide modal, show admin content
+                        loginModal.classList.add('hidden');
+                        adminContent.classList.remove('hidden');
+                        
+                        alert('Login successful!');
+                        
+                        // Load admin.js after successful login
+                        const script = document.createElement('script');
+                        script.src = '/js/admin.js';
+                        document.body.appendChild(script);
+                    } else {
+                        alert(data.message || 'Login failed. Please check your credentials.');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    alert('Login failed. Please try again.');
+                    const submitBtn = loginForm.querySelector('button[type="submit"]');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Login to Admin Panel';
+                }
+            });
+            
+            console.log('Login form handler attached');
+        });
+    </script>
 </body>
 </html>

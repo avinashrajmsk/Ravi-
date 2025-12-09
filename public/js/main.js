@@ -399,10 +399,10 @@ class SatyamGoldApp {
                     ${isInStock ? `
                         <div class="product-buttons">
                             <div class="product-buttons-row">
-                                <button class="btn-add-cart" onclick="app.addToCart(${product.id})">
+                                <button class="btn-add-cart" onclick="app.addToCart(${product.id}, event)">
                                     ADD TO CART
                                 </button>
-                                <button class="btn-buy-now" onclick="app.buyNow(${product.id})">
+                                <button class="btn-buy-now" onclick="app.buyNow(${product.id}, event)">
                                     BUY NOW
                                 </button>
                             </div>
@@ -422,28 +422,61 @@ class SatyamGoldApp {
     }
 
     // Add to cart
-    addToCart(productId) {
+    addToCart(productId, event) {
         const product = this.products.find(p => p.id === productId);
-        if (!product) return;
+        if (!product) {
+            console.error('Product not found:', productId);
+            return;
+        }
 
-        // Get selected weight
-        const productCard = event.target.closest('.product-card');
-        const selectedWeight = productCard.querySelector('.weight-option.selected');
-        const weight = selectedWeight ? selectedWeight.textContent : '1kg';
+        // Get selected weight - default to first option
+        let weight = '1kg';
+        if (event && event.target) {
+            const productCard = event.target.closest('.product-card');
+            if (productCard) {
+                const selectedWeight = productCard.querySelector('.weight-option.selected');
+                if (selectedWeight) {
+                    weight = selectedWeight.textContent;
+                }
+            }
+        }
+        
+        // Use first weight option from product if available
+        if (product.weight_options) {
+            const weights = product.weight_options.split(',');
+            weight = weights[0] + (product.unit || 'kg');
+        }
 
+        console.log('Adding to cart:', product.name, weight);
         cart.addItem(product, weight);
     }
 
-    // Buy now - Require login
-    buyNow(productId) {
+    // Buy now - Require login and open checkout
+    buyNow(productId, event) {
+        console.log('Buy Now clicked for product:', productId);
+        
+        const product = this.products.find(p => p.id === productId);
+        if (!product) {
+            console.error('Product not found:', productId);
+            utils.showToast('Product not found', 'error');
+            return;
+        }
+        
         if (!auth.isLoggedIn()) {
             utils.showToast('Please login to buy products', 'warning');
             auth.showLoginModal();
             return;
         }
         
-        this.addToCart(productId);
-        cart.show();
+        // Add to cart first
+        this.addToCart(productId, event);
+        
+        // Show cart sidebar
+        setTimeout(() => {
+            cart.show();
+        }, 300);
+        
+        utils.showToast('Product added! Proceed to checkout.', 'success');
     }
 
     // Bulk order - Direct WhatsApp redirect with admin tracking
