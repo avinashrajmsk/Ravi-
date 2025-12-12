@@ -60,14 +60,14 @@ class API {
     }
 
     async updateProduct(id, product) {
-        return this.request(`/api/products/${id}`, {
+        return this.request(`/api/products?id=${id}`, {
             method: 'PUT',
             body: JSON.stringify(product)
         });
     }
 
     async deleteProduct(id) {
-        return this.request(`/api/products/${id}`, {
+        return this.request(`/api/products?id=${id}`, {
             method: 'DELETE'
         });
     }

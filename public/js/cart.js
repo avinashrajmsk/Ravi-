@@ -548,24 +548,4 @@ class ShoppingCart {
 }
 
 // Initialize cart
-window.cart = new ShoppingCart();v>
-                    
-                    <p class="text-sm text-gray-500">
-                        We'll contact you shortly to confirm your order details and delivery time.
-                        You can track your order status by contacting us.
-                    </p>
-                </div>
-            `,
-            [
-                {
-                    text: 'Continue Shopping',
-                    class: 'btn-primary',
-                    onclick: 'this.closest(\'.modal\').remove(); utils.scrollToSection(\'products\')'
-                }
-            ]
-        );
-    }
-}
-
-// Initialize cart
 window.cart = new ShoppingCart();
