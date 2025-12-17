@@ -40,16 +40,20 @@
 - ✅ Mobile-responsive design (same as PC)
 
 ### Admin Panel:
-- ✅ Secure admin login (avinashrajmsk@gmail.com / Satyam16)
-- ✅ Dashboard with order statistics
-- ✅ Order management with status updates
+- ✅ Secure admin login (avinashrajmsk@gmail.com / Satyam16) - **WORKING PERFECTLY**
+- ✅ Dashboard with order statistics and revenue tracking
+- ✅ Order management with **real-time status updates** (dropdown in order cards)
 - ✅ Quick Order message management and tracking
 - ✅ Product management (CRUD operations)
-- ✅ NEW: Loved by counter management in product edit form
-- ✅ NEW: Original price field for discount calculation
+  - ✅ Add/Edit/Delete products
+  - ✅ Loved by counter management in product edit form
+  - ✅ Original price field for **automatic discount calculation**
+  - ✅ Print Price & Selling Price fields with % OFF display
+- ✅ **NEW: Cart History Section** - View all user cart items grouped by user
+- ✅ **NEW: User Order Tracking** - View complete order history per user from cart section
 - ✅ Hero slider image management with delete functionality
 - ✅ Site settings (branding, contact info, colors)
-- ✅ Admin authentication system
+- ✅ Admin authentication system - **COMPLETELY FIXED**
 
 ### Backend API:
 - ✅ Products API (GET, POST, PUT, DELETE)
@@ -121,29 +125,39 @@ curl http://localhost:3000
   - Site branding and customization
   - Secure authentication system
 
-## Database Schema
-- **products**: Product catalog with pricing and images
-- **orders**: Customer orders with user ID tracking
-- **quick_orders**: Bulk order messages from WhatsApp
-- **site_settings**: Configurable site settings
+## Database Schema (Cloudflare D1)
+- **products**: Product catalog with pricing, images, original_price for discounts, loved_by counter
+- **orders**: Customer orders with items (JSON), status, phone tracking
+- **cart_items**: User cart persistence (user_id, product_id, quantity, weight, timestamps)
+- **cart_history**: Historical cart data for analytics
+- **users**: User profiles with phone, name, email, address, pincode
+- **quick_orders**: Bulk order messages from WhatsApp with admin notes
+- **site_settings**: Configurable site settings (logo, colors, contact info)
 - **admin_auth**: Admin authentication tokens
-- **hero_images**: Homepage slider images with CRUD
+- **hero_images**: Homepage slider images with CRUD operations
 
 ## API Endpoints
 ### Products
-- `GET /api/products` - Get all products
+- `GET /api/products` - Get all products with pagination
 - `POST /api/products` - Add new product
-- `GET/PUT/DELETE /api/products/{id}` - Manage single product
+- `PUT /api/products?id={id}` - Update product (includes original_price, loved_by)
+- `DELETE /api/products?id={id}` - Delete product
 
 ### Orders
-- `GET /api/orders` - Get all orders (admin)
+- `GET /api/orders?limit=20&offset=0` - Get all orders (admin)
+- `GET /api/orders?phone={phone}` - Get orders by customer phone
 - `POST /api/orders` - Create new order
-- `PUT /api/orders/{id}/status` - Update order status
-- `GET /api/orders/user/{userId}` - Get user orders
+- `PUT /api/orders` - **NEW: Update order status** (body: {order_id, status})
+
+### Cart
+- `GET /api/cart` - Get all cart items grouped by user
+- `POST /api/cart` - Add item to cart (requires user authentication)
+- `GET /api/cart?user_id={user_id}` - Get cart items for specific user
 
 ### Authentication
 - `POST /api/admin/auth` - Admin login
 - `GET /api/admin/auth` - Verify admin token
+- Phone.email SMS OTP for customer authentication
 
 ### Quick Orders
 - `GET /api/quick-orders` - Get all quick orders
@@ -151,8 +165,10 @@ curl http://localhost:3000
 - `PUT /api/quick-orders` - Update order status/notes
 
 ### Settings & Media
-- `GET/PUT /api/settings` - Manage site settings
-- `GET/POST /api/hero-images` - Manage hero slider
+- `GET /api/settings` - Get site settings
+- `PUT /api/settings` - Update site settings
+- `GET /api/hero-images` - Get hero slider images
+- `POST /api/hero-images` - Add hero slider image
 - `DELETE /api/hero-images/{id}` - Delete hero image
 
 ## Authentication Integration
@@ -205,20 +221,38 @@ For any issues or questions:
 - Test admin authentication before production
 - Contact: avinash@gmail.com | 9631816666
 
-## Recent Updates (2025-12-08) - FINAL FIX
-- ✅ **IMPLEMENTED REAL Phone.email SMS OTP Authentication**
-  - Completely removed demo/placeholder authentication
-  - Real Phone.email API integration with CLIENT ID: 12468569854913964682
-  - Production-ready SMS OTP functionality with fallback handling
-  - Flipkart-style login modal with Phone.email widget integration
-  - Complete user session management and authentication flow
-- ✅ Removed all demo authentication code (simple-auth.js, phone-auth.js, supabase-config.js)
-- ✅ Updated main website to use real Phone.email authentication system
-- ✅ Enhanced utility functions for better authentication support
-- ✅ Tested and verified real SMS OTP functionality
-- ✅ **NO DEMO MODE** - Only real authentication implementation
-- ✅ **FIXED Admin Panel Login Button Issue**
-  - Resolved duplicate event listener problem in admin login form
-  - Admin login now works properly after filling credentials
-  - Implemented proper event listener management with data attribute
-  - Admin authentication flow now stable and responsive
+## Recent Updates (2025-12-17) - COMPLETE ADMIN PANEL OVERHAUL
+- ✅ **MAJOR ADMIN PANEL ENHANCEMENTS**
+  - ✅ Fixed admin panel login button responsiveness and authentication
+  - ✅ Added **Cart History** section to view all user cart items grouped by user
+  - ✅ Added **Order Status Update** functionality with dropdown in orders list
+  - ✅ Integrated real-time order status updates in admin panel
+  - ✅ Added user order history viewing from cart section
+  - ✅ Created PUT endpoint for orders API to update order status
+  - ✅ Fixed order status update API endpoint in api.js
+  
+- ✅ **PRODUCT MANAGEMENT IMPROVEMENTS**
+  - ✅ Print Price (original_price) field integrated in database schema
+  - ✅ Selling Price (price) fields working with auto percentage calculation
+  - ✅ Discount badge displayed automatically on products with original price
+  - ✅ Bulk Order button now shows for **out-of-stock** products
+  
+- ✅ **CART & ORDER TRACKING**
+  - ✅ Add to Cart and Buy Now buttons **fully functional**
+  - ✅ Cart items saved to Cloudflare D1 database automatically
+  - ✅ Order history tracked per user by phone number
+  - ✅ Cart history visible in admin panel with user grouping
+  - ✅ Real-time cart data synchronization between frontend and database
+  
+- ✅ **DATABASE INTEGRATION**
+  - ✅ All data persisting to Cloudflare D1 properly
+  - ✅ Orders, cart items, users, products fully integrated
+  - ✅ Real-time updates working across admin panel
+  - ✅ Cart items table with user_id, product details, and timestamps
+  
+- ✅ **PREVIOUS UPDATES (2025-12-08) - Phone.email Authentication**
+  - ✅ IMPLEMENTED REAL Phone.email SMS OTP Authentication
+  - ✅ CLIENT ID: 12468569854913964682
+  - ✅ Production-ready SMS OTP functionality
+  - ✅ Complete user session management
+  - ✅ NO DEMO MODE - Only real authentication
