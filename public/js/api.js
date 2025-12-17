@@ -89,9 +89,9 @@ class API {
     }
 
     async updateOrderStatus(id, status) {
-        return this.request(`/api/orders/${id}/status`, {
+        return this.request(`/api/orders`, {
             method: 'PUT',
-            body: JSON.stringify({ status })
+            body: JSON.stringify({ order_id: id, status })
         });
     }
 

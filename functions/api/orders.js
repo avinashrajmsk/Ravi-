@@ -106,3 +106,40 @@ export async function onRequestPost({ request, env, params }) {
     }, { status: 500 });
   }
 }
+
+// PUT - Update order status
+export async function onRequestPut({ request, env, params }) {
+  try {
+    const db = env.DB;
+    const { order_id, status } = await request.json();
+    
+    if (!order_id || !status) {
+      return Response.json({
+        success: false,
+        message: 'Order ID and status are required'
+      }, { status: 400 });
+    }
+    
+    const { success } = await db.prepare(`
+      UPDATE orders 
+      SET status = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(status, order_id).run();
+    
+    if (!success) {
+      throw new Error('Failed to update order status');
+    }
+    
+    return Response.json({
+      success: true,
+      message: 'Order status updated successfully'
+    });
+    
+  } catch (error) {
+    console.error('Orders PUT error:', error);
+    return Response.json({
+      success: false,
+      message: 'Failed to update order status'
+    }, { status: 500 });
+  }
+}

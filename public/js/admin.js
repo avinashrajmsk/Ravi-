@@ -238,6 +238,9 @@ class AdminPanel {
             case 'products':
                 this.loadProducts();
                 break;
+            case 'carts':
+                this.loadCartHistory();
+                break;
             case 'settings':
                 this.loadHeroImages();
                 break;
@@ -1452,6 +1455,174 @@ class AdminPanel {
     async refreshQuickOrders() {
         await this.loadQuickOrders();
         utils.showToast('Quick orders refreshed', 'success');
+    }
+
+    // Cart History Management
+    async loadCartHistory() {
+        try {
+            utils.showLoading();
+            
+            const response = await fetch('/api/cart');
+            const data = await response.json();
+            
+            if (data.success) {
+                this.cartItems = data.items;
+                this.renderCartHistory();
+            }
+        } catch (error) {
+            console.error('Failed to load cart history:', error);
+            utils.showToast('Failed to load cart history', 'error');
+        } finally {
+            utils.hideLoading();
+        }
+    }
+
+    renderCartHistory() {
+        const container = document.getElementById('cart-history-list');
+        
+        if (!this.cartItems || this.cartItems.length === 0) {
+            container.innerHTML = `
+                <div class="p-8 text-center text-gray-500">
+                    <i class="fas fa-shopping-cart text-4xl mb-4"></i>
+                    <p>No cart items found</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Group items by user_id
+        const groupedByUser = this.cartItems.reduce((acc, item) => {
+            if (!acc[item.user_id]) {
+                acc[item.user_id] = [];
+            }
+            acc[item.user_id].push(item);
+            return acc;
+        }, {});
+        
+        container.innerHTML = Object.entries(groupedByUser).map(([userId, items]) => {
+            const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+            const totalValue = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const userPhone = items[0]?.user_phone || 'Unknown';
+            
+            return `
+                <div class="bg-white border rounded-lg p-6 mb-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold">User Phone: ${userPhone}</h3>
+                            <p class="text-sm text-gray-500">User ID: ${userId}</p>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <strong>${totalItems}</strong> items | 
+                                <strong>Total Value:</strong> ${utils.formatCurrency(totalValue)}
+                            </p>
+                        </div>
+                        <button onclick="admin.viewUserOrders('${userPhone}')" class="btn btn-sm btn-primary">
+                            View Orders
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        ${items.map(item => `
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                                <div class="flex items-center gap-3">
+                                    <img src="${item.image_url}" alt="${item.product_name}" 
+                                         class="w-12 h-12 object-cover rounded"
+                                         onerror="this.src='/images/placeholder-product.jpg'">
+                                    <div>
+                                        <div class="font-medium">${item.product_name}</div>
+                                        <div class="text-sm text-gray-500">${item.weight} × ${item.quantity}</div>
+                                        <div class="text-xs text-gray-400">Added: ${utils.formatDate(item.created_at)}</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-medium">${utils.formatCurrency(item.price * item.quantity)}</div>
+                                    <div class="text-sm text-gray-500">₹${item.price} each</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async filterCartHistory() {
+        const searchTerm = document.getElementById('cart-search')?.value.toLowerCase() || '';
+        
+        if (!searchTerm) {
+            this.renderCartHistory();
+            return;
+        }
+        
+        const filtered = this.cartItems.filter(item => 
+            item.user_phone?.includes(searchTerm) ||
+            item.user_id.toString().includes(searchTerm)
+        );
+        
+        // Temporarily set filtered items and render
+        const originalItems = this.cartItems;
+        this.cartItems = filtered;
+        this.renderCartHistory();
+        this.cartItems = originalItems;
+    }
+
+    async refreshCartHistory() {
+        await this.loadCartHistory();
+        utils.showToast('Cart history refreshed', 'success');
+    }
+
+    async viewUserOrders(phone) {
+        try {
+            utils.showLoading();
+            
+            const response = await api.getOrders(100, 0);
+            if (response.success) {
+                const userOrders = response.orders.filter(order => order.customer_phone === phone);
+                
+                if (userOrders.length === 0) {
+                    utils.showToast('No orders found for this user', 'info');
+                    return;
+                }
+                
+                // Show orders in modal
+                const modal = utils.createModal(
+                    `Orders for ${phone}`,
+                    `
+                        <div class="space-y-4 max-h-96 overflow-y-auto">
+                            ${userOrders.map(order => `
+                                <div class="border rounded p-4">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <div class="font-semibold">${order.order_number}</div>
+                                            <div class="text-sm text-gray-500">${utils.formatDate(order.created_at)}</div>
+                                        </div>
+                                        <span class="order-status status-${order.status.toLowerCase().replace(' ', '-')}">${order.status}</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">
+                                        <div><strong>Total:</strong> ${utils.formatCurrency(order.total_amount)}</div>
+                                        <div><strong>Items:</strong> ${JSON.parse(order.items || '[]').length}</div>
+                                    </div>
+                                    <button onclick="admin.viewOrder(${order.id})" class="btn btn-sm btn-primary mt-2">
+                                        View Details
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `,
+                    [
+                        {
+                            text: 'Close',
+                            class: 'btn-secondary',
+                            onclick: 'this.closest(\'.modal\').remove()'
+                        }
+                    ]
+                );
+            }
+        } catch (error) {
+            console.error('Failed to load user orders:', error);
+            utils.showToast('Failed to load user orders', 'error');
+        } finally {
+            utils.hideLoading();
+        }
     }
 }
 

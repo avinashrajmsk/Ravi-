@@ -106,6 +106,10 @@
                         <i class="fas fa-box mr-2"></i>
                         Products
                     </button>
+                    <button class="nav-tab" data-section="carts">
+                        <i class="fas fa-shopping-cart mr-2"></i>
+                        Cart History
+                    </button>
                     <button class="nav-tab" data-section="settings">
                         <i class="fas fa-cog mr-2"></i>
                         Settings
@@ -145,6 +149,10 @@
             <button class="nav-tab-mobile" data-section="products">
                 <i class="fas fa-box"></i>
                 <span>Products</span>
+            </button>
+            <button class="nav-tab-mobile" data-section="carts">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Carts</span>
             </button>
             <button class="nav-tab-mobile" data-section="settings">
                 <i class="fas fa-cog"></i>
@@ -322,6 +330,39 @@
             <!-- Products Grid -->
             <div id="products-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Products will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Cart History Section -->
+        <section id="carts-section" class="section">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Cart History</h2>
+                <button onclick="admin.refreshCartHistory()" class="btn btn-secondary">
+                    <i class="fas fa-refresh mr-2"></i>
+                    Refresh
+                </button>
+            </div>
+            
+            <!-- Cart History Filter -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <input type="text" id="cart-search" placeholder="Search by phone or user ID..."
+                           class="form-control">
+                           
+                    <button onclick="admin.filterCartHistory()" class="btn btn-primary whitespace-nowrap">
+                        <i class="fas fa-search mr-2"></i>
+                        Search
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Cart History List -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="p-6">
+                    <div id="cart-history-list" class="space-y-4">
+                        <p class="text-gray-500 text-center py-8">Loading cart history...</p>
+                    </div>
+                </div>
             </div>
         </section>
 
