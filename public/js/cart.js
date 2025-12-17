@@ -32,7 +32,7 @@ class ShoppingCart {
     }
 
     // Add item to cart
-    addItem(product, weight = '1kg') {
+    async addItem(product, weight = '1kg') {
         const existingItemIndex = this.items.findIndex(
             item => item.id === product.id && item.weight === weight
         );
@@ -56,6 +56,85 @@ class ShoppingCart {
         this.saveToStorage();
         this.updateUI();
         this.showAddedNotification(product.name, weight);
+        
+        // Save to database if user is logged in
+        await this.saveToDatabase(product, weight);
+    }
+    
+    // Save cart item to database
+    async saveToDatabase(product, weight) {
+        if (!window.auth || !auth.isLoggedIn()) {
+            return; // Skip if not logged in
+        }
+        
+        const user = auth.getCurrentUser();
+        if (!user || !user.phone) {
+            return;
+        }
+        
+        try {
+            await fetch('/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_phone: user.phone,
+                    product_id: product.id,
+                    product_name: product.name,
+                    product_price: product.price,
+                    product_image: product.image_url,
+                    quantity: 1,
+                    weight: weight
+                })
+            });
+            console.log('Cart item saved to database');
+        } catch (error) {
+            console.error('Failed to save cart to database:', error);
+        }
+    }
+    
+    // Load cart from database
+    async loadFromDatabase() {
+        if (!window.auth || !auth.isLoggedIn()) {
+            return;
+        }
+        
+        const user = auth.getCurrentUser();
+        if (!user || !user.phone) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/cart?phone=${encodeURIComponent(user.phone)}`);
+            const data = await response.json();
+            
+            if (data.success && data.cart_items && data.cart_items.length > 0) {
+                // Merge database cart with local cart
+                data.cart_items.forEach(dbItem => {
+                    const existingIndex = this.items.findIndex(
+                        item => item.id === dbItem.product_id && item.weight === dbItem.weight
+                    );
+                    
+                    if (existingIndex === -1) {
+                        this.items.push({
+                            id: dbItem.product_id,
+                            name: dbItem.product_name,
+                            price: dbItem.product_price,
+                            image: dbItem.product_image,
+                            weight: dbItem.weight,
+                            quantity: dbItem.quantity
+                        });
+                    }
+                });
+                
+                this.saveToStorage();
+                this.updateUI();
+                console.log('Cart loaded from database');
+            }
+        } catch (error) {
+            console.error('Failed to load cart from database:', error);
+        }
     }
 
     // Remove item from cart

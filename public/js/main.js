@@ -382,7 +382,8 @@ class SatyamGoldApp {
                 
                 <div class="product-details">
                     <h3 class="product-title">${product.name}</h3>
-                    <div class="product-weight">${weightOptions[0]} ${product.unit}</div>
+                    ${product.description ? `<p class="product-description text-sm text-gray-600 mt-1 line-clamp-2">${product.description}</p>` : ''}
+                    <div class="product-weight mt-2">${weightOptions[0]} ${product.unit}</div>
                     
                     <div class="price-section">
                         <span class="current-price">₹${product.price}</span>
@@ -412,9 +413,15 @@ class SatyamGoldApp {
                             </button>
                         </div>
                     ` : `
-                        <button class="btn-add-cart" style="background: #9CA3AF;" disabled>
-                            OUT OF STOCK
-                        </button>
+                        <div class="product-buttons">
+                            <button class="btn-add-cart" style="background: #9CA3AF; cursor: not-allowed;" disabled>
+                                OUT OF STOCK
+                            </button>
+                            <button class="btn-bulk-order" onclick="app.bulkOrder(${product.id})">
+                                <i class="fab fa-whatsapp"></i>
+                                BULK ORDER
+                            </button>
+                        </div>
                     `}
                 </div>
             </div>

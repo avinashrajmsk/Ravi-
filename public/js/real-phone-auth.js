@@ -386,6 +386,13 @@ class RealPhoneAuthManager {
             `Welcome back ${userData.name}!`;
         
         this.showSuccess(msg);
+        
+        // Load user's cart from database after login
+        if (window.cart && typeof window.cart.loadFromDatabase === 'function') {
+            setTimeout(() => {
+                window.cart.loadFromDatabase();
+            }, 500);
+        }
     }
 
     closeLoginModal() {
